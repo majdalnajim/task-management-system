@@ -1,10 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\controllers\TestController;
+use App\Http\controllers\TaskController;
 
 
-Route::get('/add-task', [TestController::class,'store']);
-Route::get('/delete-task/{id}', [TestController::class,'delete']);
-Route::get('/update-task/{id}', [TestController::class,'update']);
-Route::get('/form', [TestController::class,'showForm']);
+
+Route::resource('tasks', TaskController::class);
