@@ -1,9 +1,15 @@
 <div>
     @if (session("success"))
-<p style="color:green;">
+<div style="background:lightgreen;padding:10px">
     {{session("success")}}
-</p>
+</div>
 @endif
+<form method="GET" action="{{route('tasks.index')}}">
+    <input type="text" name="search" placeholder="search tasks..." value="{{$search}}"/>
+    <button type="submit">Search</button>
+    @csrf
+
+</form>
 <form method="POST" action="tasks">
     <input type="text" name="title" placeholder="task title"/>
     <input type="text" name="description" placeholder="task descrption"/>
@@ -23,14 +29,19 @@
 <ul>
     @foreach($tasks as $task)
     <li>{{$task->title}} - {{$task->description}}
-     <form method="POST"action="/tasks/{{$task->id}}">
+     <form method="POST" action="/tasks/{{$task->id}}">
         @csrf
         @method("DELETE")
         <button type="submit">delete</button>
      </form>
      
-    <a href="/tasks/{{$task->id}}/editخ" style="color:#212121;"> update task</a>
+    <a href="/tasks/{{$task->id}}/edit" style="color:#212121;"> update task</a>
+    <label>
+        <input type="checkbox" name="is_complected" {{$task->is_complected==1 ?"checked":" "}}/>
+        Completed
+    </label>
 </li>
     @endforeach
 </ul>
+{{$tasks->links()}}
 </div>

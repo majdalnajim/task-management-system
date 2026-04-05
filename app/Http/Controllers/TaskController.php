@@ -9,10 +9,12 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-         $tasks=Task::all();
-        return view("tasks",compact("tasks"));
+        $search=$request->search ?? ""; 
+         $tasks=Task::where("user_id",auth()->id())->where("title","like","%".$search."%")->paginate(5)->withQueryString();
+        return view("tasks",compact("tasks","search"));
+        
     }
 
     /**
@@ -28,15 +30,18 @@ class TaskController extends Controller
      */
     public function store(Request $request)
     {
+        
                $request->validate([
             "title"=>"required|min:3",
-            "description"=>"required"
+            "description"=>"required",
         ]);
 Task::create([
             "title"=>$request->title,
-            "description"=>$request->description
+            "description"=>$request->description,
+            "is_complected"=>$request->has("is_complected"),
+            "user_id"=>auth()->id(),
         ]);
-        return redirect("/tasks")->with("success","the task was add");
+        return redirect("/tasks")->with("success","Task created successfully");
     }
 
     /**
@@ -50,9 +55,11 @@ Task::create([
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit( Task $task )
     {
-        $task=Task::find($id);
+        if($task->user_id!=auth()->id()){
+            abort(403);
+        }
         
         return view("edit",compact("task"));  
     }
@@ -60,23 +67,32 @@ Task::create([
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request,Task $task)
     {
-         $task=Task::find($id);
+        
+         if($task->user_id!=auth()->id()){
+            abort(403);
+        }
+         
         $task->update([
         "title"=>$request->title,
-        "description"=>$request->description
+        "description"=>$request->description,
+        "is_complected"=>$request->has("is_complected"),
+
        ]);
-       return redirect("/tasks")->with("success","the task was update");
+       return redirect("/tasks")->with("success","Task update successfully");
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $id, Task $task)
     {
+         if($task->user_id!=auth()->id()){
+            abort(403);
+        }
         
         Task::find($id)?->delete();
-        return redirect("/tasks")->with("success","the task was delete");
+        return redirect("/tasks")->with("success","Task deleted successfully");
     }
 }
